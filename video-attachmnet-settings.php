@@ -35,17 +35,21 @@ class VideoAttachmentSettingsPlugin
             $type_mime = explode( '/', $file['type'] );
 
             if( $type_mime[0] == 'video') {
-                $uploads = wp_upload_dir( null );
-                $file_location = $uploads['path'] . "/{$file['name']}";
-                include( __DIR__ . '/source/VideoInformation.php');
-                $videoInfo = VideoInformation::getVideoInfo( $file_location );
-                if( !empty( $videoInfo ) && isset( $videoInfo['duration'] ) ) {
-                    if( intval($videoInfo['duration']) > self::get_video_max_duration() ) {
-                        $file['error'] = __('Video File exceeds Specified Duration');
-                        return $file;
+                if( $_FILES['file']['size'] > 314572800 ) {
+                    $uploads = wp_upload_dir(null);
+                    $file_location = $uploads['path'] . "/{$file['name']}";
+                    include(__DIR__ . '/source/VideoInformation.php');
+                    $videoInfo = VideoInformation::getVideoInfo($file_location);
+                    if (!empty($videoInfo) && isset($videoInfo['duration'])) {
+                        if (intval($videoInfo['duration']) > self::get_video_max_duration()) {
+                            $file['error'] = __('Video File exceeds Specified Duration');
+                            return $file;
+                        }
+                    } else {
+                        $file['error'] = __("Video file information couldn't be read.");
                     }
                 } else {
-                    $file['error'] = __("Video file information couldn't be read.");
+                    $file['error'] = __("File size exceeds 300 MB");
                 }
             }
         }
